@@ -5,6 +5,7 @@ import android.graphics.drawable.VectorDrawable;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.util.Log;
 import android.widget.ImageView;
 import com.facebook.react.uimanager.annotations.ReactProp;
@@ -31,15 +32,15 @@ public class SvgImageManager extends SimpleViewManager<ImageView> {
   }
 
   @Nullable
-  private VectorDrawable getVectorDrawable(@NonNull Context context,
-      @Nullable final String fileName) {
+  private VectorDrawableCompat getVectorDrawable(@NonNull Context context,
+                                                 @Nullable final String fileName) {
     if (fileName == null) {
       return null;
     }
     int res = context.getResources().getIdentifier(fileName, "drawable", context.getPackageName());
     if (res != 0) {
       try {
-        return (VectorDrawable) context.getDrawable(res);
+        return VectorDrawableCompat.create(context.getResources(), res, null);
       } catch (Exception e) {
         Log.e(REACT_CLASS, "Exception", e);
         return null;
