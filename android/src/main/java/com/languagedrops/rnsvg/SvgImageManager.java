@@ -28,7 +28,9 @@ public class SvgImageManager extends SimpleViewManager<ImageView> {
   }
 
   @ReactProp(name = "tintColor") public void setTint(ImageView view, @Nullable String tint) {
-     view.setColorFilter(tint == null ? null : Color.parseColor(tint));
+    if (tint != null) {
+       view.setColorFilter(Color.parseColor(tint));
+    }
   }
 
   @Nullable
