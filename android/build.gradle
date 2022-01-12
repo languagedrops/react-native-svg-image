@@ -1,25 +1,28 @@
-
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         google()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:4.2.2'
     }
 }
 
 apply plugin: 'com.android.library'
 
+def safeExtGet(prop, fallback) {
+  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion safeExtGet('compileSdkVersion', 30)
+    buildToolsVersion safeExtGet('buildToolsVersion', '30.0.2')
 
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
-        minSdkVersion 16
-        targetSdkVersion 26
+        minSdkVersion safeExtGet('minSdkVersion', 22)
+        targetSdkVersion safeExtGet('targetSdkVersion', 30)
         versionCode 2
         versionName "0.1.1"
     }
@@ -38,6 +41,7 @@ repositories {
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
-    compile "com.android.support:appcompat-v7:26.1.0"
+    compile "androidx.appcompat:appcompat:1.2.0"
+    compile 'androidx.annotation:annotation:1.0.0'
 }
   
