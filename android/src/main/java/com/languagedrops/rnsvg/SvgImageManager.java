@@ -15,9 +15,17 @@ import com.caverock.androidsvg.SVG;
 import java.io.InputStream;
 import java.net.URL;
 import android.net.Uri;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import java.io.IOException;
 
 public class SvgImageManager extends SimpleViewManager<SVGImageView> {
   public static final String REACT_CLASS = "SvgImageView";
+  private final OkHttpClient client = new OkHttpClient();
 
   @Override
   public String getName() {
@@ -34,18 +42,43 @@ public class SvgImageManager extends SimpleViewManager<SVGImageView> {
     // check if src contains documents in it
     if (src != null && src.contains("http")) {
       try {
-        new Thread(new Runnable() {
+        // new Thread(new Runnable() {
+        // @Override
+        // public void run() {
+        // try {
+        // InputStream stream = new URL(src).openStream();
+        // SVG svg = SVG.getFromInputStream(stream);
+        // view.setSVG(svg);
+        // } catch (Exception ex) {
+        // ex.printStackTrace();
+        // }
+        // }
+        // }).start();
+        Request request = new Request.Builder()
+            .url(src)
+            .build();
+
+        client.newCall(request).enqueue(new Callback() {
           @Override
-          public void run() {
-            try {
-              InputStream stream = new URL(src).openStream();
-              SVG svg = SVG.getFromInputStream(stream);
-              view.setSVG(svg);
-            } catch (Exception ex) {
-              ex.printStackTrace();
+          public void onFailure(Call call, IOException e) {
+            e.printStackTrace();
+          }
+
+          @Override
+          public void onResponse(Call call, Response response) throws IOException {
+            try (ResponseBody responseBody = response.body()) {
+              if (!response.isSuccessful())
+                throw new IOException("Unexpected code " + response);
+
+              try {
+                SVG svg = SVG.getFromString(responseBody.string());
+                view.setSVG(svg);
+              } catch (Exception e) {
+                Log.e(REACT_CLASS, "Exception", e);
+              }
             }
           }
-        }).start();
+        });
       } catch (Exception e) {
         Log.e(REACT_CLASS, "Exception", e);
       }
