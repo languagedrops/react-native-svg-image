@@ -12,6 +12,14 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import com.caverock.androidsvg.SVGImageView;
 import com.caverock.androidsvg.SVG;
 
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Bitmap;
+import android.graphics.BlendMode;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.PorterDuff;
+import java.io.InputStream;
+
 public class SvgImageViewComponent extends SVGImageView {
   public static final String REACT_CLASS = "SvgImageViewComponent";
 
@@ -54,15 +62,44 @@ public class SvgImageViewComponent extends SVGImageView {
 
     if (mSrc != null && mSrc.contains("file://")) {
       try {
-        Uri uri = Uri.parse(mSrc);
-        setImageURI(uri);
+        if (mTintColor == null) {
+          Uri uri = Uri.parse(mSrc);
+          setImageURI(uri);
+        } else {
+          drawSVGWithColor();
+        }
+
       } catch (Exception e) {
         Log.e(REACT_CLASS, "Exception", e);
       }
     } else {
       setImageDrawable(getVectorDrawable(getContext(), mSrc));
+      if (mTintColor != null) {
+        setColorFilter(Color.parseColor(mTintColor));
+      }
     }
     mIsDirty = false;
+  }
+
+  private void drawSVGWithColor() {
+    Bitmap newBM = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+    Canvas bmcanvas = new Canvas(newBM);
+
+    // Render our document onto our canvas
+    try {
+      Uri uri = Uri.parse(mSrc);
+      InputStream is = getContext().getContentResolver().openInputStream(uri);
+      SVG svg = SVG.getFromInputStream(is);
+      svg.renderToCanvas(bmcanvas);
+      Paint paint = new Paint();
+      paint.setColorFilter(new PorterDuffColorFilter(Color.parseColor(mTintColor), PorterDuff.Mode.SRC_IN));
+      Bitmap bitmapResult = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+      Canvas canvas = new Canvas(bitmapResult);
+      canvas.drawBitmap(newBM, 0, 0, paint);
+      setImageBitmap(bitmapResult);
+    } catch (Exception e) {
+      Log.e(REACT_CLASS, "Exception", e);
+    }
   }
 
   @Nullable
