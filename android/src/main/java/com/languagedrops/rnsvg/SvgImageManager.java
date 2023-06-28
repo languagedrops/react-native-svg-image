@@ -1,54 +1,41 @@
 package com.languagedrops.rnsvg;
 
-import android.content.Context;
-import android.graphics.drawable.VectorDrawable;
-import android.graphics.Color;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import android.util.Log;
-import android.widget.ImageView;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import java.io.IOException;
 
-public class SvgImageManager extends SimpleViewManager<ImageView> {
+public class SvgImageManager extends SimpleViewManager<SvgImageViewComponent> {
   public static final String REACT_CLASS = "SvgImageView";
 
-  @Override public String getName() {
+  @Override
+  public String getName() {
     return REACT_CLASS;
   }
 
-  @Override public ImageView createViewInstance(ThemedReactContext context) {
-    return new ImageView(context);
+  @Override
+  public SvgImageViewComponent createViewInstance(ThemedReactContext context) {
+    return new SvgImageViewComponent(context);
   }
 
-  @ReactProp(name = "src") public void setSrc(ImageView view, @Nullable String src) {
-    view.setImageDrawable(getVectorDrawable(view.getContext(), src));
+  @ReactProp(name = "src")
+  public void setSrc(SvgImageViewComponent view, @Nullable String src) {
+    view.setSrc(src);
   }
 
-  @ReactProp(name = "tintColor") public void setTint(ImageView view, @Nullable String tint) {
-    if (tint != null) {
-       view.setColorFilter(Color.parseColor(tint));
-    }
+  @ReactProp(name = "tintColor")
+  public void setTint(SvgImageViewComponent view, @Nullable String tint) {
+    view.setTint(tint);
   }
 
-  @Nullable
-  private VectorDrawableCompat getVectorDrawable(@NonNull Context context,
-                                                 @Nullable final String fileName) {
-    if (fileName == null) {
-      return null;
-    }
-    int res = context.getResources().getIdentifier(fileName, "drawable", context.getPackageName());
-    if (res != 0) {
-      try {
-        return VectorDrawableCompat.create(context.getResources(), res, null);
-      } catch (Exception e) {
-        Log.e(REACT_CLASS, "Exception", e);
-        return null;
-      }
-    }
-    Log.e(REACT_CLASS, "No drawable with name " + fileName + " found.");
-    return null;
+  @Override
+  protected void onAfterUpdateTransaction(SvgImageViewComponent view) {
+    super.onAfterUpdateTransaction(view);
+    view.maybeUpdateView();
   }
+
 }
